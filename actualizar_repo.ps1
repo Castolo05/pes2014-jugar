@@ -78,13 +78,29 @@ if ($subirExe -and -not $SinPush) {
 # 3) Commit y push (por tandas para no pasar de 2 GB por push).
 if (-not (Test-Path .git)) { throw 'No hay repositorio: ejecuta primero la creacion inicial.' }
 if (-not $Mensaje) { $Mensaje = 'Actualizacion ' + (Get-Date -Format 'yyyy-MM-dd HH:mm') }
+# Push con reintentos (HTTPS corta con 408 las subidas largas): se sube cada vez como maximo ~180 MB (2 trozos).
+function Empujar {
+    if ($SinPush) { return }
+    for ($i = 1; $i -le 4; $i++) {
+        $ErrorActionPreference = 'Continue'; git push -q origin HEAD 2>&1 | Out-Null; $ok = ($LASTEXITCODE -eq 0); $ErrorActionPreference = 'Stop'
+        if ($ok) { return }
+        Write-Host "  push fallo (intento $i), reintentando"; Start-Sleep -Seconds 10
+    }
+    throw 'Fallo el push'
+}
 $tandas = @(Get-ChildItem _partes -Directory | Sort-Object Name)
 foreach ($t in $tandas) {
-    git add -A -- "_partes/$($t.Name)" "_partes/$($t.Name).sha256"
-    if (git status --porcelain -- _partes) {
-        git commit -q -m "Partes de $($t.Name.Replace('__','/'))"
-        if (-not $SinPush) { git push -q origin HEAD; if ($LASTEXITCODE -ne 0) { throw 'Fallo el push' } }
+    $partes = @(Get-ChildItem $t.FullName -Filter *.part | Sort-Object Name)
+    for ($i = 0; $i -lt $partes.Count; $i += 2) {
+        $lote = $partes[$i..([Math]::Min($i + 1, $partes.Count - 1))]
+        foreach ($p in $lote) { git add -- ("_partes/{0}/{1}" -f $t.Name, $p.Name) }
+        if (git diff --cached --name-only) {
+            git commit -q -m ("Partes de {0}: {1}" -f $t.Name.Replace('__', '/'), (($lote | ForEach-Object { $_.BaseName }) -join ','))
+            Empujar
+        }
     }
+    git add -- "_partes/$($t.Name).sha256"
+    if (git diff --cached --name-only) { git commit -q -m "Suma de $($t.Name.Replace('__','/'))"; Empujar }
 }
 git add -A
 if (git status --porcelain) { git commit -q -m $Mensaje }
