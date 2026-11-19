@@ -1,0 +1,12 @@
+# Partidas y registros: no se suben
+PES2014_PS2_extracted/mc0/
+PES2014_PS2_extracted/mc1/
+logs/
+# Archivos de mas de 100 MB: se suben partidos en _partes/ (actualizar_repo.ps1 / restaurar.ps1)
+rea/PES 2014.iso
+PES2014_PS2_extracted/0_SOUND.AFS
+PES2014_PS2_extracted/0_TEXT.AFS
+PES2014_PS2_extracted/Q_SOUND.AFS
+PES2014_PS2_extracted/S_SOUND.AFS
+# Ejecutable: va como asset del Release "ejecutable"
+PS2Recomp/build_windows/ps2xRuntime/ps2EntryRunner.exe
