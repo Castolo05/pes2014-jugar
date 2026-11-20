@@ -66,6 +66,10 @@ Def 'PES_SHOW_FPS' '0'
 Def 'PES_FPS_LIMIT' '60'
 Def 'PES_STRETCH' '0'
 Def 'PES_IOP_THREAD' '1'
+# Escudos de clubes sustituidos por logos reales (paquete generado con tools\escudos_paquete.py). Para desactivarlo: borrar
+# escudos\escudos.pack o poner PES_ESCUDOS= (vacío) antes de jugar.
+$pq = Join-Path $DIR 'escudos\escudos.pack'
+if ((Test-Path -LiteralPath $pq) -and -not [Environment]::GetEnvironmentVariable('PES_ESCUDOS')) { $env:PES_ESCUDOS = $pq }
 if (Test-Path -LiteralPath $cfg) { Def 'PES_KEYMAP' $cfg }
 
 # Registro y diagnóstico (igual que jugar.sh): logs\jugar.log (el anterior en jugar.anterior.log); si la partida anterior

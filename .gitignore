@@ -10,3 +10,6 @@ PES2014_PS2_extracted/Q_SOUND.AFS
 PES2014_PS2_extracted/S_SOUND.AFS
 # Ejecutable: va como asset del Release "ejecutable"
 PS2Recomp/build_windows/ps2xRuntime/ps2EntryRunner.exe
+
+# Copias de seguridad de partidas del usuario
+respaldo_partidas/
